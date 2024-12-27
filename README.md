@@ -30,16 +30,11 @@ The Okta TOTP Authenticator extension integrates seamlessly with Burp Suite Pro 
 </ol>
 
 **Features of the Extension**
-1. QR Code Upload for Shared Secret Extraction
-The extension allows users to upload a QR code associated with their Okta account. It decodes the QR code, extracts the shared secret, and securely stores it in Base64 format.
-2. Manual Configuration of Shared Secret
-For scenarios where a QR code is unavailable, the shared secret can be manually entered and updated directly in the extension's user interface (UI).
-3. TOTP Code Display and Refresh
-The generated TOTP code is prominently displayed in the UI and refreshes every 30 seconds to align with the TOTP protocol.
-4. Regex-Based Request Matching
-Users can specify a regex pattern to identify where TOTP codes need to be injected in HTTP requests. The default regex can be customized via the UI.
-5. Session Handling Automation
-The extension integrates with Burp Suite's session handling rules, enabling automatic TOTP injection into requests without manual intervention.
+1. The extension allows users to upload a QR code associated with their Okta account. It decodes the QR code, extracts the shared secret, and securely stores it in Base64 format.
+2. For scenarios where a QR code is unavailable, the shared secret can be manually entered and updated directly in the extension's user interface (UI).
+3. The generated TOTP code is prominently displayed in the UI and refreshes every 30 seconds to align with the TOTP protocol.
+4. Users can specify a regex pattern to identify where TOTP codes need to be injected in HTTP requests. The default regex can be customized via the UI.
+5. The extension integrates with Burp Suite's session handling rules, enabling automatic TOTP injection into requests without manual intervention.
 
 <div style='margin-top: 10px; font-size: 12px;'>
 <h3 style='text-align: left; font-size: 14px; color: #000;'>How to build jar file using Gradle:</h3>
