@@ -1,30 +1,30 @@
 package okta;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.ByteArray;
+import burp.api.mont  oya.utilities.Base64Utils;
+import burp.api.montoya.http.message.requests.HttpRequest;
+import burp.api.montoya.http.message.responses.HttpResponse;
+import burp.api.montoya.http.message.HttpRequestResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
 import java.net.URI;
 import java.net.URLDecoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.Base64;
 
 public class OktaHandler {
     private final MontoyaApi api;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Base64Utils base64Utils;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String sharedSecretEncoded;
     private String regex;
 
-//    private final GoogleAuthenticator googleAuthenticator;
-
     public OktaHandler(MontoyaApi api) {
         this.api = api;
+        this.base64Utils = api.utilities().base64Utils();
         this.sharedSecretEncoded = null;
         this.regex = "";
     }
@@ -38,7 +38,8 @@ public class OktaHandler {
             this.sharedSecretEncoded = null;
             api.logging().logToError("Shared secret cleared.");
         } else {
-            this.sharedSecretEncoded = Base64.getEncoder().encodeToString(secret.trim().getBytes(StandardCharsets.UTF_8));
+            ByteArray secretBytes = ByteArray.byteArray(secret.trim().getBytes(StandardCharsets.UTF_8));
+            this.sharedSecretEncoded = base64Utils.encodeToString(secretBytes);
         }
     }
 
@@ -47,12 +48,12 @@ public class OktaHandler {
             return null;
         }
         try {
-            byte[] decodeBytes = Base64.getDecoder().decode(sharedSecretEncoded);
-            return new String(decodeBytes,StandardCharsets.UTF_8);
+            ByteArray decodeBytes = base64Utils.decode(sharedSecretEncoded);
+            return new String(decodeBytes.getBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return null;
-        }
+        return null;
     }
+        }
 
     public String getRegex() {
         return regex;
@@ -108,18 +109,15 @@ public class OktaHandler {
 
     public String[] getDomainKey(String domain) throws Exception {
         String url = "https://" + domain + "/oauth2/v1/keys";
+        HttpRequest request = HttpRequest.httpRequestFromUrl(url).withMethod("GET");
+        HttpRequestResponse requestResponse = api.http().sendRequest(request);
+        HttpResponse response = requestResponse.response();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new RuntimeException("Failed to fetch domain keys. HTTP Status: " + response.statusCode());
         }
 
-        JsonNode keysNode = objectMapper.readTree(response.body()).get("keys");
+        JsonNode keysNode = objectMapper.readTree(response.bodyToString()).get("keys");
         if (keysNode == null || !keysNode.isArray() || keysNode.size() == 0) {
             throw new IllegalArgumentException("No keys found in the response.");
         }
@@ -179,23 +177,23 @@ public class OktaHandler {
         String requestBody = objectMapper.writeValueAsString(requestBodyMap);
 
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", authorizationHeader)
-                .header("User-Agent", userAgent)
-                .header("Accept", "application/json; charset=UTF-8")
-                .header("Accept-Encoding", "gzip, deflate")
-                .header("Content-Type", "application/json; charset=UTF-8")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+        HttpRequest request = HttpRequest.httpRequestFromUrl(url)
+                .withMethod("POST")
+                .withHeader("Authorization", authorizationHeader)
+                .withHeader("User-Agent", userAgent)
+                .withHeader("Accept", "application/json; charset=UTF-8")
+                .withHeader("Accept-Encoding", "gzip, deflate")
+                .withHeader("Content-Type", "application/json; charset=UTF-8")
+                .withBody(requestBody);
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpRequestResponse requestResponse = api.http().sendRequest(request);
+        HttpResponse response = requestResponse.response();
 
         if (response.statusCode() != 200) {
             throw new RuntimeException("Failed to create Okta authenticator. HTTP Status: " + response.statusCode());
         }
 
-        JsonNode responseNode = objectMapper.readTree(response.body());
+        JsonNode responseNode = objectMapper.readTree(response.bodyToString());
         return responseNode.get("methods").get(0).get("sharedSecret").asText();
     }
 
