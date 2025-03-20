@@ -1,6 +1,8 @@
 package okta;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.ByteArray;
+import burp.api.montoya.utilities.Base64Utils;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
@@ -10,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Base64;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -22,12 +23,14 @@ public class OktaUIInterface extends JPanel {
 
     private final OktaHandler oktaHandler;
     private final MontoyaApi api;
+    private final Base64Utils base64Utils;
     private final JTextField sharedSecretField;
     private final JTextField regexField;
     private final JLabel totpCodeLabel;
 
     public OktaUIInterface(MontoyaApi api, OktaHandler oktaHandler) {
         this.api = api;
+        this.base64Utils = api.utilities().base64Utils();
         this.oktaHandler = oktaHandler;
 
         setLayout(new BorderLayout());
@@ -133,8 +136,9 @@ public class OktaUIInterface extends JPanel {
 
                 // Fetch domain keys and create Okta authenticator
                 String[] keys = oktaHandler.getDomainKey(verifyData.domain);
-                String sharedSecret = oktaHandler.createOktaAuthenticator("iPhone15", verifyData, keys[0], keys[1]);
-                sharedSecretField.setText(Base64.getEncoder().encodeToString(sharedSecret.getBytes()));
+                String sharedSecret = oktaHandler.createOktaAuthenticator("Burp", verifyData, keys[0], keys[1]);
+                ByteArray secretBytes = ByteArray.byteArray(sharedSecret.getBytes());
+                sharedSecretField.setText(base64Utils.encodeToString(secretBytes));
 
                 // Set the shared secret in the handler
                 oktaHandler.setSharedSecret(sharedSecret);
@@ -188,6 +192,6 @@ public class OktaUIInterface extends JPanel {
         if (codeUpdateFuture != null) {
             codeUpdateFuture.cancel(false);
             EXECUTOR_SERVICE.shutdown();
+           }
         }
     }
-}
