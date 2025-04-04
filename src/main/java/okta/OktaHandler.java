@@ -2,7 +2,7 @@ package okta;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.ByteArray;
-import burp.api.mont  oya.utilities.Base64Utils;
+import burp.api.montoya.utilities.Base64Utils;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.http.message.HttpRequestResponse;
