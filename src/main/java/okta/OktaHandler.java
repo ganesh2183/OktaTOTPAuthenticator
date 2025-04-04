@@ -1,7 +1,6 @@
 package okta;
 
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.utilities.Base64Utils;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -38,8 +37,7 @@ public class OktaHandler {
             this.sharedSecretEncoded = null;
             api.logging().logToError("Shared secret cleared.");
         } else {
-            ByteArray secretBytes = ByteArray.byteArray(secret.trim().getBytes(StandardCharsets.UTF_8));
-            this.sharedSecretEncoded = base64Utils.encodeToString(secretBytes);
+            this.sharedSecretEncoded = base64Utils.encodeToString(secret.trim());
         }
     }
 
@@ -48,8 +46,7 @@ public class OktaHandler {
             return null;
         }
         try {
-            ByteArray decodeBytes = base64Utils.decode(sharedSecretEncoded);
-            return new String(decodeBytes.getBytes(), StandardCharsets.UTF_8);
+            return base64Utils.decode(sharedSecretEncoded).toString();
         } catch (Exception e) {
         return null;
     }
