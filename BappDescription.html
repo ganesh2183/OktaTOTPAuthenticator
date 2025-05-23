@@ -1,17 +1,22 @@
-<p>OktaTOTPAuthenticator is a Burp Suite plugin designed to dynamically generate Okta Time-Based One-Time Password (TOTP) 2FA codes. These codes can then be automatically used in the applications session handling rules. With this powerful tool, you can automate the process of generating and injecting TOTP codes into your HTTP requests, simplifying your workflow when performing security testing on Okta enabled authentication sites.</p>
+<p>This extension generates time-based one-time passwords (TOTP) for Okta accounts and injects them into HTTP requests automatically. It is designed to integrate with session handling rules, allowing seamless security testing of Okta-enabled authentication flows.</p>
 
 <h2>Features</h2>
+
 <ul>
-<li>The extension allows users to upload a QR code associated with their Okta account, decoding the QR code, extracting the shared secret, and securely storing it in Base64 format.</li>
-<li>If a QR code is unavailable, users can manually enter the shared secret in the extensions user interface (UI).</li>
-<li>Every 30 seconds, the TOTP code is refreshed in the UI, ensuring alignment with the TOTP protocol.</li>
-<li>Through the UI, users can customise a regex pattern to determine where TOTP codes should be injected into HTTP requests.</li>
-<li>Due to the integration with Burp Suites session handling rules, theres no need for manual intervention when injecting TOTP codes into requests. The process is completely automated.</li>
+  <li>Handles automatic TOTP generation for Okta accounts using shared secrets.</li>
+  <li>Supports importing shared secrets via QR code or manual entry.</li>
+  <li>Displays the current TOTP code in the UI, refreshing every 30 seconds.</li>
+  <li>Uses a configurable regex pattern to locate TOTP placeholders in requests (default: <code class="InlineCode">(?&lt;![\w\d])\d{6,8}(?![\w\d])</code>).</li>
+  <li>Integrates with session handling rules to automate TOTP injection in tools like Scanner and Repeater.</li>
 </ul>
 
 <h2>Usage</h2>
-<p>Firstly, add the extension to Burp Suite. Once added, navigate to the <code class=\InlineCode\>Okta TOTP Authenticator</code> UI interface. Here, you either <strong>Import QR</strong> or manually update the sharedsecret value in the <code class=\InlineCode\>Shared Secret</code> field. Remember to click the Update button, and update the regex pattern.</p>
 
-<p>After this, you can set up your session handling rules. Under <code class=\InlineCode\>Session handling rules</code>, add a new rule that invokes a Burp extension, selecting <code class=\InlineCode\>Okta TOTP Handler</code> from the dropdown. In the <code class=\InlineCode\>Scope</code> tab, ensure that the box for <code class=\InlineCode\>Tools scope &gt; Scanner, Repeater</code> is checked, and configure your URL scope appropriately.</p>
-
-<p>The extension is now set up and ready for use. Security testing on Okta enabled authentication sites can now be performed within Burp Suite Professional with the aid of automated TOTP code generation and injection.</p>
+<ol>
+  <li>Open the extension's tab and either import a QR code or manually enter the shared secret in the 'Shared Secret' field, then click 'Update'.</li>
+  <li>Customize the regex pattern in the UI, if needed, to match TOTP locations in requests.</li>
+  <li>Go to "Settings -&gt; Sessions" and create a new session handling rule.</li>
+  <li>In "Rule actions", add "Invoke a Burp extension" and select "Okta TOTP Handler" from the dropdown list.</li>
+  <li>In the "Scope" tab, check appropriate tools and configure the URL scope.</li>
+  <li>Perform security testing against Okta-protected targets with TOTP automatically handled.</li>
+</ol>

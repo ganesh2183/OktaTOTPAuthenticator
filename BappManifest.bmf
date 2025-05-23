@@ -1,13 +1,13 @@
 Uuid: 92f23c8578944b339094940a567ab94e
 ExtensionType: 1
 Name: Okta TOTP Authenticator
-RepoName: oktatotpauthenticator
+RepoName: okta-totp-authenticator
 ScreenVersion: 1.0.0
 SerialVersion: 1
 MinPlatformVersion: 0
 ProOnly: False
 Author: ganesh2183
-ShortDescription: This extension generates Okta TOTP 2FA codes dynamically for session handling in Burp Suite. It supports TOTP injection, QR code uploads, manual shared secret configuration, and regex customization.
+ShortDescription: Generate Okta TOTP 2FA codes dynamically for session handling.
 EntryPoint: ./OktaAuthenticate-1.0-SNAPSHOT.jar
 BuildCommand: ./gradlew jar
 SupportedProducts: Pro, Community
