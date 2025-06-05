@@ -3,11 +3,11 @@ ExtensionType: 1
 Name: Okta TOTP Authenticator
 RepoName: okta-totp-authenticator
 ScreenVersion: 1.0.0
-SerialVersion: 1
-MinPlatformVersion: 0
+SerialVersion: 3
+MinPlatformVersion: 17
 ProOnly: False
-Author: ganesh2183
+Author: Ganesh2183
 ShortDescription: Generate Okta TOTP 2FA codes dynamically for session handling.
-EntryPoint: ./OktaAuthenticate-1.0-SNAPSHOT.jar
-BuildCommand: ./gradlew jar
+EntryPoint: build/libs/OktaAuthenticate-1.0-SNAPSHOT.jar
+BuildCommand: ./gradlew fatJar
 SupportedProducts: Pro, Community
