@@ -42,25 +42,24 @@ public class OktaHandler {
     }
 
     public String decodeSharedSecret() {
+        try {
         if (sharedSecretEncoded == null || sharedSecretEncoded.isEmpty()) {
             return null;
         }
-        try {
-            return base64Utils.decode(sharedSecretEncoded).toString();
+            return new String(base64Utils.decode(sharedSecretEncoded).getBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-        return null;
-    }
+            api.logging().logToError("Error decoding shared secret: " + e.getMessage());
+            return null;
         }
+    }
 
     public String getRegex() {
         return regex;
     }
 
-
     public void setRegex(String regex) {
         this.regex = regex;
     }
-
 
     public String generateTOTP() {
         String decodedSecret = decodeSharedSecret();
@@ -69,7 +68,8 @@ public class OktaHandler {
         }
         try {
             GoogleAuthenticator authenticator = new GoogleAuthenticator();
-            int totp = authenticator.getTotpPassword(decodedSecret);
+            long currentTimeMillis = System.currentTimeMillis();
+            int totp = authenticator.getTotpPassword(decodedSecret, currentTimeMillis);
             return String.format("%06d", totp);
         } catch (Exception e) {
             api.logging().logToError("Error generating TOTP: " + e.getMessage());
@@ -83,7 +83,7 @@ public class OktaHandler {
         public String domain;
     }
 
-    public OktaVerifyData extractVerifyData(String qrUrl) throws Exception {
+    public OktaVerifyData extractVerifyData(String qrUrl) {
         URI uri = URI.create(qrUrl);
 
         if (!"oktaverify".equals(uri.getScheme())) {
@@ -115,7 +115,7 @@ public class OktaHandler {
         }
 
         JsonNode keysNode = objectMapper.readTree(response.bodyToString()).get("keys");
-        if (keysNode == null || !keysNode.isArray() || keysNode.size() == 0) {
+        if (keysNode == null || !keysNode.isArray() || keysNode.isEmpty()) {
             throw new IllegalArgumentException("No keys found in the response.");
         }
 
@@ -131,7 +131,44 @@ public class OktaHandler {
         String authorizationHeader = "OTDT " + verifyData.t;
         String userAgent = "D2DD7D3915.com.okta.android.auth/6.8.1 DeviceSDK/0.19.0 Android/7.1.1 unknown/Google";
 
+        Map<String, Object> deviceDetails = buildDeviceDetails(deviceName, kid, n);
 
+        List<Map<String, Object>> methods = new ArrayList<>();
+        Map<String, Object> methodDetails = new HashMap<>();
+        methodDetails.put("isFipsCompliant", false);
+        methodDetails.put("supportUserVerification", false);
+        methodDetails.put("type", "totp");
+        methods.add(methodDetails);
+
+        Map<String, Object> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("authenticatorId", verifyData.f);
+        requestBodyMap.put("device", deviceDetails);
+        requestBodyMap.put("key", "okta_verify");
+        requestBodyMap.put("methods", methods);
+
+        String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+
+        HttpRequest request = HttpRequest.httpRequestFromUrl(url)
+                .withMethod("POST")
+                .withHeader("Authorization", authorizationHeader)
+                .withHeader("User-Agent", userAgent)
+                .withHeader("Accept", "application/json; charset=UTF-8")
+                .withHeader("Accept-Encoding", "gzip, deflate")
+                .withHeader("Content-Type", "application/json; charset=UTF-8")
+                .withBody(requestBody);
+
+        HttpRequestResponse requestResponse = api.http().sendRequest(request);
+        HttpResponse response = requestResponse.response();
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Failed to create Okta authenticator. HTTP Status: " + response.statusCode());
+        }
+
+        JsonNode responseNode = objectMapper.readTree(response.bodyToString());
+        return responseNode.get("methods").get(0).get("sharedSecret").asText();
+    }
+
+    private Map<String, Object> buildDeviceDetails(String deviceName, String kid, String n) {
         Map<String, Object> clientInstanceKey = new HashMap<>();
         clientInstanceKey.put("alg", "RS256");
         clientInstanceKey.put("e", "AQAB");
@@ -158,43 +195,10 @@ public class OktaHandler {
         deviceDetails.put("screenLock", false);
         deviceDetails.put("secureHardwarePresent", false);
 
-        List<Map<String, Object>> methods = new ArrayList<>();
-        Map<String, Object> methodDetails = new HashMap<>();
-        methodDetails.put("isFipsCompliant", false);
-        methodDetails.put("supportUserVerification", false);
-        methodDetails.put("type", "totp");
-        methods.add(methodDetails);
-
-        Map<String, Object> requestBodyMap = new HashMap<>();
-        requestBodyMap.put("authenticatorId", verifyData.f);
-        requestBodyMap.put("device", deviceDetails);
-        requestBodyMap.put("key", "okta_verify");
-        requestBodyMap.put("methods", methods);
-
-        String requestBody = objectMapper.writeValueAsString(requestBodyMap);
-
-
-        HttpRequest request = HttpRequest.httpRequestFromUrl(url)
-                .withMethod("POST")
-                .withHeader("Authorization", authorizationHeader)
-                .withHeader("User-Agent", userAgent)
-                .withHeader("Accept", "application/json; charset=UTF-8")
-                .withHeader("Accept-Encoding", "gzip, deflate")
-                .withHeader("Content-Type", "application/json; charset=UTF-8")
-                .withBody(requestBody);
-
-        HttpRequestResponse requestResponse = api.http().sendRequest(request);
-        HttpResponse response = requestResponse.response();
-
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("Failed to create Okta authenticator. HTTP Status: " + response.statusCode());
-        }
-
-        JsonNode responseNode = objectMapper.readTree(response.bodyToString());
-        return responseNode.get("methods").get(0).get("sharedSecret").asText();
+        return deviceDetails;
     }
 
-    private Map<String, String> parseQuery(URI uri) throws Exception {
+    private Map<String, String> parseQuery(URI uri) {
         Map<String, String> query = new LinkedHashMap<>();
         String[] pairs = uri.getQuery().split("&");
         for (String pair : pairs) {
