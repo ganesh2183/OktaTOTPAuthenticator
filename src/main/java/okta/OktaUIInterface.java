@@ -1,3 +1,5 @@
+// OktaUIInterface.java
+
 package okta;
 
 import burp.api.montoya.MontoyaApi;
@@ -280,16 +282,20 @@ public class OktaUIInterface extends JPanel {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            g2.setColor(Color.LIGHT_GRAY);
+            //Color ringBg = UIManager.getColor("Panel.background");
+            Color ringFg = UIManager.getColor("Label.foreground");
+            Color ringProgress = new Color(0x4285F4);
+
+            g2.setColor(ringFg.darker().darker());
             g2.setStroke(new BasicStroke(14));
             g2.drawOval(x, y, size, size);
 
-            g2.setColor(new Color(0x4285F4));
+            g2.setColor(ringProgress);
             g2.setStroke(new BasicStroke(14));
             int angle = (int) (360 * (progress / 100.0));
             g2.drawArc(x, y, size, size, 90, -angle);
 
-            g2.setColor(Color.BLACK);
+            g2.setColor(ringFg);
             g2.setFont(new Font("Arial", Font.BOLD, 36));
             FontMetrics fm = g2.getFontMetrics();
             int codeWidth = fm.stringWidth(totpCode);
