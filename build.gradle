@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'net.portswigger.burp.extensions:montoya-api:2024.11'
+    implementation 'net.portswigger.burp.extensions:montoya-api:2025.2'
     implementation 'com.warrenstrange:googleauth:1.5.0'
     implementation 'com.google.zxing:core:3.5.1'
     implementation 'com.google.zxing:javase:3.5.1'
