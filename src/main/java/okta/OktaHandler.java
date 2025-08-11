@@ -43,9 +43,9 @@ public class OktaHandler {
 
     public String decodeSharedSecret() {
         try {
-        if (sharedSecretEncoded == null || sharedSecretEncoded.isEmpty()) {
-            return null;
-        }
+            if (sharedSecretEncoded == null || sharedSecretEncoded.isEmpty()) {
+                return null;
+            }
             return new String(base64Utils.decode(sharedSecretEncoded).getBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
             api.logging().logToError("Error decoding shared secret: " + e.getMessage());
