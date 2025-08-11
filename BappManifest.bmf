@@ -4,7 +4,7 @@ Name: Okta TOTP Authenticator
 RepoName: okta-totp-authenticator
 ScreenVersion: 1.0.2
 SerialVersion: 6
-MinPlatformVersion: 19
+MinPlatformVersion: 14
 ProOnly: False
 Author: Ganesh Babu
 ShortDescription: Generate Okta TOTP 2FA codes dynamically for session handling.
