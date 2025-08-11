@@ -25,7 +25,7 @@ public class BurpExtender implements BurpExtension {
         api.http().registerSessionHandlingAction(new MySessionHandlingAction(api, oktaHandler));
 
         // Add the custom UI tab
-        api.userInterface().registerSuiteTab("Okta TOTP Authenticator", oktaUIInterface);
+        api.userInterface().registerSuiteTab("Okta Authenticator", oktaUIInterface);
 
         api.extension().registerUnloadingHandler(() -> {
             if (oktaUIInterface != null) {
