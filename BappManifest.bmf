@@ -1,0 +1,13 @@
+Uuid: 92f23c8578944b339094940a567ab94e
+ExtensionType: 1
+Name: Okta TOTP Authenticator
+RepoName: okta-totp-authenticator
+ScreenVersion: 1.0.2
+SerialVersion: 7
+MinPlatformVersion: 4
+ProOnly: False
+Author: Ganesh Babu
+ShortDescription: Generate Okta TOTP 2FA codes dynamically for session handling.
+EntryPoint: OktaAuthenticate-1.0-SNAPSHOT.jar
+BuildCommand: ./gradlew fatJar
+SupportedProducts: Pro, Community

@@ -1,0 +1,22 @@
+<p>This extension generates time-based one-time passwords (TOTP) for Okta accounts and injects them into HTTP requests automatically. It is designed to integrate with session handling rules, allowing seamless security testing of Okta-enabled authentication flows.</p>
+
+<h2>Features</h2>
+
+<ul>
+  <li>Handles automatic TOTP generation for Okta accounts using shared secrets.</li>
+  <li>Supports importing shared secrets via QR code or manual entry.</li>
+  <li>Displays the current TOTP code in the UI, refreshing every 30 seconds.</li>
+  <li>Uses a configurable regex pattern to locate TOTP placeholders in requests (default: <code class="InlineCode">(?&lt;![\w\d])\d{6,8}(?![\w\d])</code>).</li>
+  <li>Integrates with session handling rules to automate TOTP injection in tools like Scanner and Repeater.</li>
+</ul>
+
+<h2>Usage</h2>
+
+<ol>
+  <li>Open the extension's tab and either import a QR code or manually enter the shared secret in the 'Shared Secret' field, then click 'Update'.</li>
+  <li>Customize the regex pattern in the UI, if needed, to match TOTP locations in requests.</li>
+  <li>Go to "Settings -&gt; Sessions" and create a new session handling rule.</li>
+  <li>In "Rule actions", add "Invoke a Burp extension" and select "Okta TOTP Handler" from the dropdown list.</li>
+  <li>In the "Scope" tab, check appropriate tools and configure the URL scope.</li>
+  <li>Perform security testing against Okta-protected targets with TOTP automatically handled.</li>
+</ol>
